@@ -55,11 +55,21 @@ namespace cs_sstu_lab7.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Status")] PartyMember partyMember)
+        public async Task<IActionResult> Create([Bind("Id,Name,Email,Status")] PartyMember partyMember)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(partyMember);
+                var _partyMember = await _context.PartyMember.SingleOrDefaultAsync(p => p.Email == partyMember.Email);
+                if (_partyMember != null)
+                {
+                    _partyMember.Status = partyMember.Status;
+                    _partyMember.Name = partyMember.Name;
+                    _context.Update(_partyMember);
+                }
+                else
+                {
+                    _context.Add(partyMember);
+                }
                 await _context.SaveChangesAsync();
                 return RedirectToAction("Thanks", "Home"); ;
             }
@@ -87,7 +97,7 @@ namespace cs_sstu_lab7.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Status")] PartyMember partyMember)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Email,Status")] PartyMember partyMember)
         {
             if (id != partyMember.Id)
             {
